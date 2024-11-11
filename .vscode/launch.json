@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SpringHttpApplication<spring-http>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.aloha.spring_http.SpringHttpApplication",
+            "projectName": "spring-http",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
