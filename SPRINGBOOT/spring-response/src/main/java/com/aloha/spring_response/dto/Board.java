@@ -20,9 +20,14 @@ public class Board {
     private Date createdAt;
     private Date updatedAt;
 
-    public Board(String title, String writer, String content) {
+    public Board(int no, String title, String writer, String content) {
+        this.no = no;
         this.title = title;
         this.writer = writer;
         this.content = content;
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
     }
+
+   
 }
