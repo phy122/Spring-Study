@@ -1,6 +1,7 @@
 package com.aloha.community.dto;
 
 import java.util.Date;
+import java.util.UUID;
 
 import lombok.Data;
 
@@ -14,4 +15,10 @@ public class Comments {
     private String content;
     private Date createdAt;
     private Date updatedAt;
+
+    public Comments() {
+        this.id = UUID.randomUUID().toString();
+    }
+
+    
 }

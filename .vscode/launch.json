@@ -49,6 +49,16 @@
             "projectName": "rest",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-CommunityApplication<community>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.aloha.community.CommunityApplication",
+            "projectName": "community",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
