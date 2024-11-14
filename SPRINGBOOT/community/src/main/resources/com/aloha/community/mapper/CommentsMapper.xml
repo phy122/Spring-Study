@@ -7,13 +7,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="list" resultType="Comments">
         SELECT *
         FROM comments
-        ORDER BY created_at DESC
     </select>
 
     <select id="select" resultType="Comments">
         SELECT *
         FROM comments
-        WHERE no = #{no}
+        WHERE id = #{id}
     </select>
 
     <insert id="insert">
@@ -25,11 +24,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         UPDATE comments
            SET writer = #{writer}
               ,content = #{content}
-        WHERE no = #{no}
+        WHERE id = #{id}
     </update>
 
     <delete id="delete">
         DELETE FROM comments
-        WHERE no = #{no}
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 게시글 기준 목록 -->
+    <select id="listByParent" resultType="Comments">
+        SELECT *
+        FROM comments
+        WHERE board_no = #{boardNo}
+    </select>
+    
+    <!-- 게시글 기준 삭제 -->
+    <delete id="deleteByParent">
+        DELETE
+        FROM comments
+        WHERE board_no = #{boardNo}
     </delete>
 </mapper>

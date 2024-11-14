@@ -19,10 +19,10 @@ public class CommentsServiceImpl implements CommentsService {
         List<Comments> commentsList = commentsMapper.list();
         return commentsList;
     }
-
+    
     @Override
-    public Comments select(int no) throws Exception {
-        Comments comments = commentsMapper.select(no);
+    public Comments select(String id) {
+        Comments comments = commentsMapper.select(id);
         return comments;
     }
 
@@ -39,8 +39,20 @@ public class CommentsServiceImpl implements CommentsService {
     }
 
     @Override
-    public int delete(int no) throws Exception {
-        int result = commentsMapper.delete(no);
+    public int delete(String id) throws Exception {
+        int result = commentsMapper.delete(id);
+        return result;
+    }
+
+    @Override
+    public List<Comments> listByParent(int boardNo) throws Exception {
+        List<Comments> commentsList = commentsMapper.listByParent(boardNo);
+        return commentsList;
+    }
+
+    @Override
+    public int deleteByParent(int boardNo) throws Exception {
+        int result = commentsMapper.deleteByParent(boardNo);
         return result;
     }
     

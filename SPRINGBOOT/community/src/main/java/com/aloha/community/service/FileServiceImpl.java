@@ -49,9 +49,32 @@ public class FileServiceImpl implements FileService {
         return result;
     }
 
+    /**
+     * 파일 삭제
+     * 파일 시스템의 파일 삭제
+     * DB 파일 정보 삭제
+     */
     @Override
     public int delete(String id) throws Exception {
-        int result = fileMapper.delete(id);
+        // 파일 시스템의 파일 삭제
+        Files file = select(id);
+        String filePath = file.getFilePath();
+
+        File deleteFile = new File(filePath);
+        // 파일 존재 여부 확인
+        if( !deleteFile.exists() ){
+            log.error("파일이 존재하지 않습니다.");
+            log.error("filePath : ", filePath);
+            return 0;
+        }
+        int result = 0;
+        if( deleteFile.delete()){
+            log.info("[FS] 파일 삭제 성공");
+            // DB 파일 정보 삭제
+            result = fileMapper.delete(id);
+            log.info("[DB] 파일 정보 삭제 성공");
+        }
+
         return result;
     }
 
@@ -95,5 +118,23 @@ public class FileServiceImpl implements FileService {
     public List<Files> listByParent(Files file) throws Exception {
         List<Files> fileList = fileMapper.listByParent(file);
         return fileList;
+    }
+
+    @Override
+    public int deleteByParent(Files file) throws Exception {
+        List<Files> deleteFileList = fileMapper.listByParent(file);
+
+        // 파일 시스템 파일 삭제
+        for (Files f : deleteFileList) {
+            File deleteFile = new File(f.getFilePath());
+            if (deleteFile.exists()) {
+                deleteFile.delete();
+            }
+        }
+
+        // 첨부된 파일 전체 한 번에 삭제
+        int result = fileMapper.deleteByParent(file);
+        log.info(result + "건의 파일 정보가 삭제되었습니다.");
+        return result;
     }
 }

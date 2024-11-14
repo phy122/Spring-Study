@@ -25,7 +25,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <textarea name="content" id="content" cols="40" rows="5" readonly th:text="${board.content}"></textarea>
+                    <textarea name="content" cols="40" rows="5" readonly th:text="${board.content}"></textarea>
                 </td>
             </tr>
         </table>
@@ -34,60 +34,12 @@
             <button type="button" onclick="moveList()">목록</button>
         </div>
     </form>
-
-    <h2>댓글 목록</h2>
-    <table border="1">
-        <tr>
-            <th>작성자</th>
-            <th>내용</th>
-            <th>등록일자</th>
-            <th>수정</th>
-            <th>삭제</th>
-        </tr>
-        <th:block th:each="comments : ${commentsList}">
-            <tr>
-                <td th:text="${comments.writer}"></td>
-                <td th:text="${comments.content}"></td>
-                <td th:text="${#dates.format(comments.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                <td>
-                    <form action="/board/updateComments" method="post">
-                        <input type="hidden" name="no" th:value="${board.no}">
-                        <input type="hidden" name="commentNo" th:value="${comments.no}">
-                        <button type="submit">수정</button>
-                    </form>
-                </td>
-                <td>
-                    <form action="/board/deleteComments" method="post">
-                        <input type="hidden" name="no" th:value="${board.no}">
-                        <input type="hidden" name="commentNo" th:value="${comments.no}">
-                        <button type="submit">삭제</button>
-                    </form>
-                </td>
-            </tr>
-        </th:block>
-    </table>
-
-    <h3>댓글 작성</h3>
-    <form action="/board/addComments" method="post">
-        <input type="hidden" name="boardNo" th:value="${board.no}">
-        <table>
-            <tr>
-                <td>작성자</td>
-                <td>
-                    <input type="text" name="writer" required>
-                </td>
-            </tr>
-            <tr>
-                <td>내용</td>
-                <td>
-                    <textarea name="content" required></textarea>
-                </td>
-            </tr>
-        </table>
-        <button type="submit">댓글 작성</button>
-        <table>
+    <h2>파일 목록</h2>
+    <section id="file-list"> 
+        <table border="1">
             <tr>
                 <th>no</th>
+                <!-- <th>id</th> -->
                 <th>이미지</th>
                 <th>파일명</th>
                 <th>용량</th>
@@ -97,6 +49,7 @@
             <th:block th:each="file : ${fileList}">
                 <tr>
                     <td><span th:text="${file.no}"></span></td>
+                    <!-- <td><span th:text="${file.id}"></span></td> -->
                     <td>
                         <img th:src="|/img?id=${file.id}|" height="100" alt="파일 이미지">
                     </td>
@@ -104,15 +57,41 @@
                     <td><span th:text="${file.fileSize}"></span></td>
                     <td><span th:text="${file.type}"></span></td>
                     <td>
-                        <button type="button">다운로드</button>
-                        <button type="button">삭제</button>
+                        <button type="button" th:onclick="download([[${file.id}]])">다운로드</button>
                     </td>
                 </tr>
             </th:block>
         </table>
-    </form>
+    </section >
 
+    <h2>댓글 목록</h2>
+    <section id="comment-list">
+        
+    </section>
+    <section id="comment-form">
+        <form action="">
+            <table>
+                <tr>
+                    <td>작성자</td>
+                    <td>
+                        <input type="text" name="writer" id="writer">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <textarea name="content" id="content" rows="5" cols="40"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <button type="button" onclick="insertComment()">등록</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </section>
     <script>
+        // 수정 화면 이등
         let id = "[[${board.id}]]"
 
         function moveUpdate() {
@@ -122,6 +101,172 @@
         function moveList() {
             location.href = '/board/list'
         }
+
+        // 다운로드
+        function download(id){
+            location.href = `/file/${id}`
+        }
+
+        function getFileList(){
+            let parentTable = 'board'
+            let parentNo = '[[${board.no}]]'
+            let url = `/file?parentTable=${parentTable}&parentNo=${parentNo}`
+
+            let request = new XMLHttpRequest()
+
+            request.onreadystatechange = function(){
+                if(request.readyState == request.DONE && request.status == 200){
+                    console.log('파일 목록 갱신 성공')
+                    let fileList = request.responseText
+                    let $fileList = document.getElementById('file-list')
+                    $fileList.innerHTML = ""    // 기본 파일 목록 비우기
+                    $fileList.innerHTML = fileList  // 새로 조회한 파일 목록으로 갱신
+                }
+            }
+            request.open('GET', url, true)
+            request.send()
+        }
+
+        // 댓글 등록
+        function insertComment(){
+            const boardNo = "[[${board.no}]]"
+            let writer = document.getElementById('writer').value
+            let content = document.getElementById('content').value
+            console.log(`writer : ${writer}`);
+            console.log(`content : ${content}`);
+
+            let data = {
+                'boardNo' : boardNo,
+                'writer' : writer,
+                'content' : content
+            }
+
+            let request = new XMLHttpRequest()
+            let url = '/comment'
+            request.open('POST', url, true)
+            request.setRequestHeader('Content-Type', 'application/json')
+            request.send(JSON.stringify(data))
+
+            request.onreadystatechange = function(){
+                if(request.readyState == request.DONE && request.status == 200){
+                    let response = request.responseText
+                    if(response == 'SUCCESS'){
+                        console.log('댓글 등록 성공');
+                        // 댓글 목록 갱신
+                        commentList()
+
+                        // 입력한 작성자, 내용 비우기
+                        document.getElementById('writer').value = ""
+                        document.getElementById('content').value = ""
+                    }
+                }
+            }
+        }
+        // 댓글 목록
+        commentList()
+        function commentList(){
+            let request = new XMLHttpRequest()
+            let boardNo = "[[${board.no}]]"
+            let url = `/comment?boardNo=${boardNo}`
+            request.open('GET', url, true)
+            request.send()
+
+            request.onreadystatechange = function(){
+                let commentList = request.responseText
+                console.log(commentList)
+                let $commentList = document.getElementById('comment-list')
+                $commentList.innerHTML = commentList
+            }
+        }
+        
+        function removeComment(id){
+        let request = new XMLHttpRequest()
+        let url = `/comment/${id}`
+        request.open('DELETE', url, true)
+        request.send()
+        request.onreadystatechange = function(){
+            if(request.readyState == request.DONE && request.status == 200){
+                let response = request.responseText
+                if(response == 'SUCCESS'){
+                    console.log('댓글 삭제 성공')
+                    commentList()
+                }
+                else{
+                    alert('댓글 삭제 실패')
+                }
+            }
+        }
+    }
+
+    // 댓글 [수정] 버튼 클릭 시 - 수정 폼으로 전환
+    function editComment(button, id){
+        let $table = button.closest('table')
+        console.log($table);
+
+        // 기존 작성자와 기존 내용을 가져오기
+        let writer = $table.querySelector('.comment-writer').textContent
+        let content = $table.querySelector('.comment-content').textContent
+
+        // 기존 조회 폼은 숨김
+        $table.style.display = 'none'
+
+        // 수정 폼 삽입
+        let updateForm = `
+            <table>
+                <tr>
+                    <td>
+                        <input type="text" name="writer" id="comment-writer" value="${writer}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <textarea name = "content" id="comment-content" rows="5" cols="40">${content}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <button type="button" onclick="updateComment( '${id}' )">수정</button>
+                        <button type="button">삭제</button>
+                    </td>
+                </tr>
+            </table>
+        `
+        // DOM 노드는 after() 함수로 다음 요소로 추가
+        // $table.after(updateForm)
+        // 텍스트로된 html 코드를 다음 요소로 추가
+        $table.insertAdjacentHTML("afterend", updateForm)
+    }
+
+    // 댓글 수정 요청
+    function updateComment(id){
+        console.log(`id : ${id}`);
+        let commentWriter = document.getElementById('comment-writer').value
+        let commentContent = document.getElementById('comment-content').value
+        let data ={
+            'id'    : id,
+            'writer' : commentWriter,
+            'content' : commentContent
+        }
+
+        let request = new XMLHttpRequest()
+        let url = '/comment'
+        request.open('PUT', url, true)
+        request.setRequestHeader('Content-Type', 'application/json')
+        request.send(JSON.stringify(data))
+
+        request.onreadystatechange = function(){
+            if(request.readyState == request.DONE && request.status == 200){
+                let response = request.responseText
+                if(response == 'SUCCESS'){
+                    console.log('댓글 수정 성공');
+                    commentList() // 댓글 목록 갱신
+                }
+                else{
+                    alert('댓글 수정 실패')
+                }
+            }
+        }
+    }
     </script>
 </body>
 </html>
