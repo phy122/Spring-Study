@@ -226,7 +226,7 @@
                 <tr>
                     <td align="right">
                         <button type="button" onclick="updateComment( '${id}' )">수정</button>
-                        <button type="button">삭제</button>
+                        <button type="button" onclick="cancelComment( this )">취소</button>
                     </td>
                 </tr>
             </table>
@@ -243,8 +243,8 @@
         let commentWriter = document.getElementById('comment-writer').value
         let commentContent = document.getElementById('comment-content').value
         let data ={
-            'id'    : id,
-            'writer' : commentWriter,
+            'id'      : id,
+            'writer'  : commentWriter,
             'content' : commentContent
         }
 
@@ -263,6 +263,89 @@
                 }
                 else{
                     alert('댓글 수정 실패')
+                }
+            }
+        }
+    }
+
+    // 댓글 수정 중 - 취소 버튼 클릭 시
+    function cancelComment( cancelButton ){
+        // 수정폼
+        let $table = cancelButton.closest('table')
+
+        // 조회폼
+        let $comment = $table.previousElementSibling    // 바로 앞의 형제자매 요소
+
+        $comment.style.display = 'table'    // 조회폼 보여주기
+        $table.remove()                     // 수정폼 제거
+        
+    }
+
+    // 답글 버튼 클릭 시 - 답글 등록 폼 추가
+    function insertReply(insertButton, parentNo){
+        let $table = insertButton.closest('table') // 조회 폼
+        
+        let insertForm = `
+            <table class="reply-form">
+                <tr>
+                    <td>
+                        <input type="text" name="writer" id="reply-writer"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <textarea name = "content" id="reply-content" rows="5" cols="40"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <button type="button" onclick="createReply( ${parentNo} )">등록</button>
+                        <button type="button" onclick="cancelComment( this )">취소</button>
+                    </td>
+                </tr>
+            </table>
+        `
+
+        // 답글 등록 폼이 여러개 생기지 않도록, 기존 등록 폼 제거
+        let replyForms =  document.getElementsByClassName('reply-form')
+        for (let i = 0; i < replyForms.length; i++) {
+            const replyForm = replyForms[i];
+            replyForm.remove()
+            
+        }
+
+        // 텍스트로된 html 코드를 다음 요소로 추가
+        $table.insertAdjacentHTML("afterend", insertForm)
+    }
+
+    // 답글 등록 요청
+    function createReply( parentNo ){
+        let boardNo = "[[${board.no}]]"
+        let writer = document.getElementById('reply-writer').value
+        let content = document.getElementById('reply-content').value
+
+        let data ={
+            parentNo : parentNo,
+            boardNo : boardNo,
+            writer : writer,
+            content : content
+        }
+
+        let request = new XMLHttpRequest()
+        let url = "/comment"
+        request.open("POST", url, true)
+        request.setRequestHeader('Content-Type', 'application/json')
+        request.send(JSON.stringify(data))
+
+        request.onreadystatechange = function(){
+            if(request.readyState == request.DONE && request.status == 200){
+                let response = request.responseText
+                if(response == 'SUCCESS'){
+                    console.log('답글 등록 성공');
+                    commentList()
+                }
+                else{
+                    alert('답글 등록 실패')
                 }
             }
         }
