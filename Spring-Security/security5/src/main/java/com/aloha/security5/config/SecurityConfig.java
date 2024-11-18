@@ -41,7 +41,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             // 폼 로그인 설정
             // - 기본 로그인 경로 : /login
-            http.formLogin(login -> login.permitAll());
+            // loginpage("로그인화면경로") : 설정 시, 시큐리티 기본 로그인 페이지 미사용(커스텀 로그인 페이지)
+            http.formLogin(login -> login.loginPage("/login")
+                                         .permitAll());
 
             // 로그아웃 설정
             // - 기본 로그아웃 경로 : /logout
@@ -129,7 +131,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         try {
                 repositoryImpl.getJdbcTemplate().execute(repositoryImpl.CREATE_TABLE_SQL);
         } catch (Exception e) {
-                log.info("persistent_logins 테이블이 이미 생성되었습니다.");
+                log.error("persistent_logins 테이블이 이미 생성되었습니다.");
         }
         return repositoryImpl;
     }
