@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.aloha.community.dto.Board;
 import com.aloha.community.dto.Files;
@@ -46,6 +47,17 @@ public class BoardController {
         model.addAttribute("option", option);
         model.addAttribute("rows", page.getRows());
         model.addAttribute("page", page);
+
+        String pageUrl =UriComponentsBuilder.fromPath("/board/list")
+                            // .queryParam("page", page.getPage())
+                            .queryParam("keyword", option.getKeyword())
+                            .queryParam("code", option.getCode())
+                            .queryParam("rows", page.getRows())
+                            .queryParam("orderCode", option.getOrderCode())
+                            .build()
+                            .toUriString();
+
+        model.addAttribute("pageUrl", pageUrl);
 
         return "/board/list";       
     }
