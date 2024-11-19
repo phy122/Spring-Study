@@ -1,11 +1,9 @@
 package com.aloha.security6.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.aloha.security6.domain.CustomUser;
 import com.aloha.security6.domain.Users;
 import com.aloha.security6.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,15 +30,19 @@ public class HomeController {
      * 🔗 [GET] - / 
      * 📄 index.html
      * @return
-          * @throws Exception 
-          */
+     * @throws Exception 
+     */
          @GetMapping("")
-         public String home(@AuthenticationPrincipal User authUser, Model model) throws Exception {
+         public String home(@AuthenticationPrincipal CustomUser authUser, Model model) throws Exception {
         log.info(":::::::::: 메인 화면 ::::::::::");
 
-        String username = authUser.getUsername();
-        Users user = userService.select(username);
-        model.addAttribute("user", user);
+        if(authUser != null){
+            Users user = authUser.getUser();
+            model.addAttribute("user", user);
+            // String username = authUser.getUsername();       // 인증된 사용자 아이디
+            // Users user = userService.select(username);      // 사용자 정보 조회
+            // model.addAttribute("user", user); // 사용자 정보를 모델에 등록
+        }
         
 
         return "index";
@@ -66,13 +70,28 @@ public class HomeController {
      * @throws Exception
      */
     @PostMapping("/join")
-    public String joinPro(Users user) throws Exception {
+    public String joinPro(Users user, HttpServletRequest request) throws Exception {
         log.info(":::::::::: 회원 가입 처리 ::::::::::");
         log.info("user : " + user);
 
+        // 암호화 전 비밀번호
+        String plainPassword = user.getPassword();
+        // 회원 가입 요청
         int result = userService.join(user);
 
+        // 회원 가입 성공 시, 바로 로그인
+        boolean loginResult = false;
         if( result > 0 ) {
+            // 암호화 전 비밀번호 다시 세팅
+            // 회원가입 시, 비밀번호 암호화하기 때문에, 
+            user.setPassword(plainPassword);
+            loginResult = userService.login(user, request);
+            return "redirect:/";
+        }
+        if(loginResult){
+            return "redirect:/";
+        }
+        if(result > 0) {
             return "redirect:/login";
         }
         return "redirect/join?error";
@@ -99,6 +118,17 @@ public class HomeController {
         // 사용 가능한 아이디입니다.
         log.info("사용 가능한 아이디 입니다." + username);
         return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    /**
+     * 로그인 화면
+     * @return
+     */
+    @GetMapping("/login")
+    public String login() {
+        log.info(":::::::::: 로그인 페이지 ::::::::::");
+        
+        return "/login";
     }
     
 }
