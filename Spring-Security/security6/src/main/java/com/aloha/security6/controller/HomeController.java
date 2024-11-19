@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import com.aloha.security6.domain.CustomUser;
 import com.aloha.security6.domain.Users;
 import com.aloha.security6.service.UserService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -125,8 +127,26 @@ public class HomeController {
      * @return
      */
     @GetMapping("/login")
-    public String login() {
+    public String login(@CookieValue(value = "remember-id", required = false) Cookie cookie, Model model,HttpServletRequest request) {
+        // @CookieValue(value = "쿠키이름", required = 필수여부)
+        // - required=true (default) : 쿠키를 필수로 가져와서 없으면 에러
+        // - required=false          : 쿠키 필수 X -> 쿠키가 없으면 null, 에러 X
+        
+        
         log.info(":::::::::: 로그인 페이지 ::::::::::");
+
+
+
+        String username = "";
+        boolean rememberId = false;
+        if( cookie != null){
+            log.info("CookieName : " + cookie.getName());
+            log.info("CookieValue : " + cookie.getValue());
+            username = cookie.getValue();
+            rememberId = true;
+        }
+        model.addAttribute("userId", username);
+        model.addAttribute("rememberId", rememberId);
         
         return "/login";
     }

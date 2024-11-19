@@ -16,6 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import com.aloha.security6.security.CustomAccessDeniedHandler;
+import com.aloha.security6.security.LoginFailureHandler;
+import com.aloha.security6.security.LoginSuccessHandler;
 import com.aloha.security6.service.UserDetailServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,15 @@ public class SecurityConfig {
     @Autowired
     private UserDetailServiceImpl userDetailsServiceImpl;
 
+    @Autowired
+    private LoginSuccessHandler LoginSuccessHandler;
+
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
 
 
     // 스프링 시큐리티 설정 메소드
@@ -38,7 +50,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         // ✅ 인가 설정
-        http.authorizeHttpRequests(requests -> requests
+        http.authorizeHttpRequests(auth -> auth
+                                            .requestMatchers("/admin","/admin/**").hasRole("ADMIN")
+                                            .requestMatchers("/user","/user/**").hasAnyRole("USER","ADMIN")
                                             .requestMatchers("/**").permitAll()
                                             .anyRequest().permitAll()
                                             );
@@ -46,8 +60,14 @@ public class SecurityConfig {
                                             
         // 🔐 폼 로그인 설정
         // ✅ 커스텀 로그인 페이지
-        http.formLogin(login -> login.loginPage("/login")
-                                     .loginProcessingUrl("/login"));
+        http.formLogin(login -> login.loginPage("/login")   // 로그인 페이지 경로
+                                     .loginProcessingUrl("/login")  // 로그인 요청 경로
+                                    //  .defaultSuccessUrl("/?success") // 로그인 성공 경로
+                                     .successHandler(LoginSuccessHandler)       // 로그인 성공 처리자 설정
+                                    //  .failureUrl("/login?error")  // 로그인 실패 경로
+                                     .failureHandler(loginFailureHandler)       // 로그인 실패 처리자 설정
+                                     
+                                     ); 
 
         // 사용자 정의 인증
         http.userDetailsService(userDetailsServiceImpl);
@@ -56,6 +76,21 @@ public class SecurityConfig {
         http.rememberMe(me -> me.key("aloha")
                                 .tokenRepository(tokenRepository())
                                 .tokenValiditySeconds(60 * 60 * 24 * 7));   // 7일 유효시간 (초단위)
+
+        http.exceptionHandling(exception -> exception
+                                            // 예외 처리 페이지 설정
+                                            // .accessDeniedPage("/exception")
+                                            // 접근 거부 처리자 설정
+                                            .accessDeniedHandler(customAccessDeniedHandler)
+                                            );
+
+        // 로그 아웃 설정
+        http.logout(logout -> logout.logoutUrl("/logout")   // 로그아웃 요청 경로
+                                    .logoutSuccessUrl("/login?logout") // 로그아웃 성공 시 URL
+                                    .invalidateHttpSession(true)  // 세션 초기화
+                                    .deleteCookies("remember-id") // 로그아웃 시, 아이디 저장 쿠키 삭제
+
+        );
 
         return http.build();
 
@@ -129,7 +164,7 @@ public class SecurityConfig {
         JdbcTokenRepositoryImpl repositoryImpl = new JdbcTokenRepositoryImpl();
         // ✅ 토큰 저장소를 사용하는 데이터 소스 지정
         // - 시큐리티가 자동 로그인 프로세스를 처리하기 위한 DB를 지정합니다.
-        repositoryImpl.setDataSource(dataSource);   
+        repositoryImpl.setDataSource(dataSource);
         // 서버 실행 시, 자동 로그인 테이블 자동 생성
         // repositoryImpl.setCreateTableOnStartup(true);
         // persistent_logins 테이블 생성
@@ -137,7 +172,7 @@ public class SecurityConfig {
             repositoryImpl.getJdbcTemplate().execute(JdbcTokenRepositoryImpl.CREATE_TABLE_SQL);
         } 
         catch (BadSqlGrammarException e) {
-            log.error("persistent_logins 테이블이 이미 존재합니다.");   
+            log.error("persistent_logins 테이블이 이미 존재합니다.");
         }
         catch (Exception e) {
             log.error("자동 로그인 테이블 생성 중 , 예외 발생");
