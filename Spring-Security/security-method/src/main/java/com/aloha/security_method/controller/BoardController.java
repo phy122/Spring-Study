@@ -1,4 +1,4 @@
-package com.aloha.community.controller;
+package com.aloha.security_method.controller;
 
 import java.util.List;
 
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.aloha.community.dto.Board;
-import com.aloha.community.dto.Files;
-import com.aloha.community.dto.Option;
-import com.aloha.community.dto.Page;
-import com.aloha.community.service.BoardService;
-import com.aloha.community.service.FileService;
+import com.aloha.security_method.domain.Board;
+import com.aloha.security_method.domain.Files;
+import com.aloha.security_method.domain.Option;
+import com.aloha.security_method.domain.Page;
+import com.aloha.security_method.service.BoardService;
+import com.aloha.security_method.service.FileService;
 
 import lombok.extern.slf4j.Slf4j;
 
