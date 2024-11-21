@@ -3,6 +3,7 @@ package com.aloha.security_method.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.aloha.security_method.domain.Board;
+import com.aloha.security_method.domain.CustomUser;
 import com.aloha.security_method.domain.Files;
 import com.aloha.security_method.domain.Option;
 import com.aloha.security_method.domain.Page;
+import com.aloha.security_method.domain.Users;
 import com.aloha.security_method.service.BoardService;
 import com.aloha.security_method.service.FileService;
+import com.aloha.security_method.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +36,9 @@ public class BoardController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/list")
     public String list(Model model
@@ -86,8 +93,10 @@ public class BoardController {
 
 
     @PostMapping("/insert")
-    public String insertPro(Board board) throws Exception {
+    public String insertPro(@AuthenticationPrincipal CustomUser authUser, Board board) throws Exception {
         log.info("board : " + board);
+        Users user = userService.select(authUser.getUsername());
+        board.setUserNo(user.getNo());
         int result = boardService.insert(board);
         if( result > 0 ) {
             return "redirect:/board/list";

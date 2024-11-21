@@ -15,7 +15,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE 
             <if test="option.code == 0">
                 title LIKE CONCAT('%', #{option.keyword}, '%')
-            OR user_no LIKE CONCAT('%', #{option.keyword}, '%')
+            OR u.name LIKE CONCAT('%', #{option.keyword}, '%')
             OR content LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
             <if test="option.code == 1">
@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             OR content LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
             <if test="option.code == 4">
-                 user_no LIKE CONCAT('%', #{option.keyword}, '%')
+                 u.name LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
         <if test="option.orderCode == 0">
             ORDER BY created_at DESC
@@ -62,7 +62,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="update">
         UPDATE board
            SET title = #{title}
-              ,user_no = #{userNo}
               ,content = #{content}
               ,updated_at = now()
         WHERE id = #{id}
@@ -77,11 +76,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 데이터 개수 -->
     <select id="count" resultType="int">
         SELECT COUNT(*)
-          FROM board
+          FROM board b join user u ON b.user_no = u.no
          WHERE
             <if test="option.code == 0">
                 title LIKE CONCAT('%', #{option.keyword}, '%')
-            OR user_no LIKE CONCAT('%', #{option.keyword}, '%')
+            OR u.name LIKE CONCAT('%', #{option.keyword}, '%')
             OR content LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
             <if test="option.code == 1">
@@ -95,7 +94,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             OR content LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
             <if test="option.code == 4">
-                 user_no LIKE CONCAT('%', #{option.keyword}, '%')
+                 u.name LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
     </select>
 </mapper>

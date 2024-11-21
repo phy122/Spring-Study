@@ -55,7 +55,7 @@
                 <td>
                     <a th:href="|/board/read?id=${board.id}|" th:text="${board.title}">제목</a>
                 </td>
-                <td th:text="${board.writer}"></td>
+                <td th:text="${board.userNo}"></td>
                 <td align="center" th:text="${#dates.format(board.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                 <td align="center" th:text="${#dates.format(board.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
             </tr>
