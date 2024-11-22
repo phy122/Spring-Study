@@ -3,6 +3,7 @@ package com.aloha.security_method.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,6 +50,7 @@ public class BoardController {
                     ) throws Exception {
 
         List<Board> boardList = boardService.list(option, page);
+        log.info(boardList.toString());
         model.addAttribute("boardList", boardList);
         model.addAttribute("option", option);
         model.addAttribute("rows", page.getRows());
@@ -104,14 +106,24 @@ public class BoardController {
         return "redirect:/board/insert?error";  
     }
     
-
+    /**
+     *  수정
+     * @param id
+     * @return
+     * @throws Exception
+     * #p, #p1 로 파라미터 인덱스를 지정하여, 가져올 수 있다.
+     * 여기서는 요청 파라미터로 넘어온 id -> #p0
+     * "@빈이름" 형태로 특정 빈의 메소드를 호출할 수 있다.
+     * @Service("boardservice")
+     */
+    @PreAuthorize("(hasRole('ADMIN')) or (#p0 != null and @BoardService.isOwner(#p0, authentication.principal.user.no))")
     @GetMapping("/update")
-    public String update(@RequestParam("id") String id, Model model, Files file) throws Exception {
+    public String update(@RequestParam(name = "id") String id, Model model, Files file) throws Exception {
         Board board = boardService.select(id);
         model.addAttribute("board", board);
 
          // 파일 목록 조회
-         file.setParentNo(board.getNo());
+        //  file.setParentNo(board.getNo());
          file.setParentTable("board");
          List<Files> fileList = fileService.listByParent(file);
          model.addAttribute("fileList", fileList);

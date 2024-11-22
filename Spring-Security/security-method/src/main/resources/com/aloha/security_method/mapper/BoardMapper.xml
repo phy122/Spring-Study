@@ -97,4 +97,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  u.name LIKE CONCAT('%', #{option.keyword}, '%')
             </if>
     </select>
+
+    <!-- 회원번호 비교 -->
+  <!-- UserMapper.xml -->
+    <select id="isOwner" resultType="boolean" parameterType="map">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM board b
+        JOIN user u ON b.user_no = u.no
+        WHERE b.user_no = #{buserNo} AND u.no = #{userNo}
+    </select>
 </mapper>

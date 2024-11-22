@@ -27,6 +27,8 @@ public interface BoardService {
     
     public int delete(String id) throws Exception;
 
+    public boolean isOwner(String id, Long userNo) throws Exception;
+
     // 데이터 개수
     public int count(Option option) throws Exception;
     

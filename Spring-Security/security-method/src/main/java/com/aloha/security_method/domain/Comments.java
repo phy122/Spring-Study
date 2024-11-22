@@ -12,11 +12,12 @@ import lombok.Data;
 @Data
 public class Comments {
 
-    private int no;
+    private Long no;
     private String id;
-    private int boardNo;
-    private int parentNo;
+    private Long boardNo;
+    private Long parentNo;
     private String writer;
+    private Long userNo;
     private String content;
     private Date createdAt;
     private Date updatedAt;

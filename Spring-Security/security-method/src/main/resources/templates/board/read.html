@@ -69,27 +69,29 @@
         
     </section>
     <section id="comment-form">
-        <form action="">
-            <table>
-                <tr>
-                    <td>작성자</td>
-                    <td>
-                        <input type="text" name="writer" id="writer">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <textarea name="content" id="content" rows="5" cols="40"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="right">
-                        <button type="button" onclick="insertComment()">등록</button>
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </section>
+    <form action="">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <table>
+            <tr>
+                <td>작성자</td>
+                <td>
+                    <input type="text" name="writer" id="writer">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea name="content" id="content" rows="5" cols="40"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="right">
+                    <button type="button" onclick="insertComment()">등록</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</section>
+
     <script>
         // 수정 화면 이등
         let id = "[[${board.id}]]"
@@ -126,6 +128,8 @@
             request.open('GET', url, true)
             request.send()
         }
+        
+         let csrfToken = "[[${_csrf.token}]]"
 
         // 댓글 등록
         function insertComment(){

@@ -38,10 +38,11 @@ public class CommentsServiceImpl implements CommentsService {
 
         // 댓글 등록
         // : 댓글 번호를 부모 댓글 번호로 수정 (no = parent_no)
-        int parentNo = comments.getParentNo();
+        Long parentNo = comments.getParentNo();
         if(parentNo == 0){
             comments.setParentNo(comments.getNo());
             commentsMapper.update(comments);
+
         }
 
         return result;
@@ -66,8 +67,8 @@ public class CommentsServiceImpl implements CommentsService {
         Comments deletedComment = commentsMapper.select(id);
 
         // 답글 삭제
-        int parentNo = deletedComment.getNo();
-        int no = deletedComment.getParentNo();
+        Long parentNo = deletedComment.getNo();
+        Long no = deletedComment.getParentNo();
         if(no == parentNo){
             commentsMapper.deleteReplyByParent(parentNo);
         }
@@ -82,25 +83,25 @@ public class CommentsServiceImpl implements CommentsService {
     }
 
     @Override
-    public List<Comments> listByParent(int boardNo) throws Exception {
+    public List<Comments> listByParent(Long boardNo) throws Exception {
         List<Comments> commentsList = commentsMapper.listByParent(boardNo);
         return commentsList;
     }
 
     @Override
-    public int deleteByParent(int boardNo) throws Exception {
+    public int deleteByParent(Long boardNo) throws Exception {
         int result = commentsMapper.deleteByParent(boardNo);
         return result;
     }
 
     @Override
-    public List<Comments> replyList(int parentNo) throws Exception {
+    public List<Comments> replyList(Long parentNo) throws Exception {
         List<Comments> replyList = commentsMapper.replyList(parentNo);
         return replyList;
     }
 
     @Override
-    public int deleteReplyByParent(int parentNo) throws Exception {
+    public int deleteReplyByParent(Long parentNo) throws Exception {
         int result = commentsMapper.deleteReplyByParent(parentNo);
         return result;
     }

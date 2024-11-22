@@ -1,6 +1,7 @@
 package com.aloha.security_method.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -22,10 +23,10 @@ public interface BoardMapper {
     public int update(Board board) throws Exception;
 
     public int delete(String id) throws Exception;
-    
-    public int maxPk() throws Exception;
 
     // 데이터 개수
     public int count(@Param("option") Option option) throws Exception;
+
+    boolean isOwner(Map<String,Object> params) throws Exception;
     
 }

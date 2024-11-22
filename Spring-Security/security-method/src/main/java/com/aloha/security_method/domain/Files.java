@@ -14,14 +14,14 @@ import lombok.Data;
 @Builder
 public class Files {
 
-    private int no;
+    private Long no;
     private String id;
     private String fileName;
     private String filePath;
     private Long fileSize;
     private String type;
     private String parentTable;
-    private int parentNo;
+    private Long parentNo;
     private Date createdAt;
     private Date updatedAt;
 

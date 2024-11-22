@@ -17,15 +17,15 @@ public interface CommentsService {
     public int delete(String id) throws Exception;
     
     // 부모 기준 댓글 목록
-    public List<Comments> listByParent(int boardNo) throws Exception;
+    public List<Comments> listByParent(Long boardNo) throws Exception;
 
     // 부모 기준 댓글 삭제
-    public int deleteByParent(int boardNo) throws Exception;
+    public int deleteByParent(Long boardNo) throws Exception;
 
     // 답글 목록
-    public List<Comments> replyList(int parentNo) throws Exception;
+    public List<Comments> replyList(Long parentNo) throws Exception;
 
      // 부모 댓글 기준 답글 삭제
-     public int deleteReplyByParent(int parentNo) throws Exception;
+     public int deleteReplyByParent(Long parentNo) throws Exception;
     
 }

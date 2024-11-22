@@ -98,7 +98,7 @@ public class FileController {
          public String fileList(Files file, Model model) throws Exception {
             List<Files> fileList = fileService.listByParent(file);
             model.addAttribute("fileList", fileList);
-            return new String();
+            return "/file/list";
         }
     
     

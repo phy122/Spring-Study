@@ -1,10 +1,15 @@
 package com.aloha.security_method.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.aloha.security_method.domain.Board;
+import com.aloha.security_method.domain.Files;
 import com.aloha.security_method.domain.Option;
 import com.aloha.security_method.domain.Page;
 import com.aloha.security_method.mapper.BoardMapper;
@@ -12,11 +17,15 @@ import com.aloha.security_method.mapper.BoardMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service    
+@Service("BoardService")    
 public class BoardServiceImpl implements BoardService {
     
     @Autowired
     private BoardMapper boardMapper;
+
+    @Autowired
+    private FileService fileService;
+    
 
    
     @Override
@@ -31,9 +40,26 @@ public class BoardServiceImpl implements BoardService {
         return board;        
     }
 
-    @Override
+     @Override
     public int insert(Board board) throws Exception {
         int result = boardMapper.insert(board);
+
+        List<MultipartFile> fileList = board.getFileList();
+
+        if(fileList != null){
+            for (MultipartFile file : fileList) {
+                // 빈 파일이 넘어온 경우
+                if(file != null && file.isEmpty())
+                    continue;
+
+                Files uploadFile = new Files();
+                uploadFile.setFile(file);
+                uploadFile.setParentTable("board");
+                uploadFile.setParentNo(board.getNo());
+                uploadFile.setType("main");
+                fileService.upload(uploadFile);
+            }
+        }
         return result;
     }
 
@@ -42,6 +68,13 @@ public class BoardServiceImpl implements BoardService {
         // 게시글 정보 수정
         int result = boardMapper.update(board);
 
+        // 삭제할 파일 처리
+        List<String> deleteFiles = board.getDeleteFiles();
+        if(deleteFiles != null && !deleteFiles.isEmpty())
+            for (String fileId : deleteFiles) {
+                log.info("fileId : " + fileId);
+                fileService.delete(fileId); // 파일 삭제 요청
+            }
         return result;
     }
 
@@ -90,6 +123,19 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public int count(Option option) throws Exception {
         return boardMapper.count(option);
+    }
+
+    @Override
+    public boolean isOwner(String id, Long userNo) throws Exception {
+        Board board = boardMapper.select(id);
+        Long bUserNo = board.getUserNo();
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("buserNo", bUserNo);
+        params.put("userNo", userNo);
+
+        return boardMapper.isOwner(params);
+
     }
 
 

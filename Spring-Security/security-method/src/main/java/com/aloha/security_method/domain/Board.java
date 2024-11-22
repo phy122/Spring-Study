@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class Board {
 
-    private int no;
+    private Long no;
     private String id;
     private String title;
     private String writer;
@@ -19,6 +19,7 @@ public class Board {
     private String content;
     private Date createdAt;
     private Date updatedAt;
+    private String name;
 
     private List<MultipartFile> fileList;   // 파일 목록
     private List<String> deleteFiles;   // 삭제할 파일 ID 리스트

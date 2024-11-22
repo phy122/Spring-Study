@@ -5,25 +5,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="com.aloha.security_method.mapper.CommentsMapper">
     <select id="list" resultType="Comments">
-        SELECT *
-        FROM comments
+       SELECT c.*
+               ,u.no user_no
+               ,u.name
+               ,u.username
+        FROM comments c join user u ON c.user_no = u.no
     </select>
 
     <select id="select" resultType="Comments">
-        SELECT *
-        FROM comments
+        SELECT c.*
+               ,u.no user_no
+               ,u.name
+               ,u.username
+        FROM comments c join user u ON c.user_no = u.no
         WHERE id = #{id}
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="no">
-        INSERT INTO comments( id, board_no, parent_no,  writer, content)
-        VALUES (#{id},#{boardNo}, #{parentNo}, #{writer}, #{content} )
+        INSERT INTO comments( id, board_no, parent_no,  user_no, content)
+        VALUES (#{id},#{boardNo}, #{parentNo}, #{userNo}, #{content} )
     </insert>
 
     <update id="update">
         UPDATE comments
            SET parent_no = #{parentNo}
-              ,writer = #{writer}
               ,content = #{content}
               ,updated_at = now()
         WHERE id = #{id}
